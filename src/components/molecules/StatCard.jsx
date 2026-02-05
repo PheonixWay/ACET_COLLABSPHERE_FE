@@ -1,0 +1,1 @@
+export default function StatCard({ title, value, hint }){ return (<div className="card p-6"><div className="text-base text-gray-600 dark:text-gray-300">{title}</div><div className="mt-1 text-2xl font-extrabold">{value}</div>{hint && <div className="mt-1 text-sm text-gray-400">{hint}</div>}</div>) }

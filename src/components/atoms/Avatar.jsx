@@ -1,0 +1,1 @@
+export default function Avatar({ name='U' }){ const i=name?.[0]?.toUpperCase?.() ?? 'U'; return <div className='flex h-10 w-10 items-center justify-center rounded-full bg-sky-200 text-sky-900 text-base font-bold'>{i}</div> }

@@ -1,0 +1,3 @@
+import { useData } from '../../context/DataContext'
+import { Link } from 'react-router-dom'
+export default function ActiveProjects(){ const { projects }=useData(); return (<div className="card p-6"><h2 className="text-xl font-semibold">📌 Active Projects</h2><div className="mt-4 space-y-4">{projects.map(p=>(<div key={p.id} className="rounded-2xl border border-gray-100 dark:border-gray-700 p-4 flex items-center justify-between"><div><div className="text-lg font-semibold">{p.title} — {p.brand}</div><div className="text-base text-gray-600 dark:text-gray-300">Due: {p.due} • Payout: ₹{p.payout.toLocaleString('en-IN')} • Status: {p.status}</div></div><Link to={`/app/project/${p.id}`} className="btn btn-primary">👀 View / Submit</Link></div>))}</div></div>) }

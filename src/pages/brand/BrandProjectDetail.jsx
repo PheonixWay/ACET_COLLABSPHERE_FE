@@ -1,0 +1,3 @@
+import { useParams } from 'react-router-dom'
+import { ACTIVE_PROJECTS } from '../../data/mockActiveProjects'
+export default function BrandProjectDetail(){ const { id }=useParams(); const p=ACTIVE_PROJECTS.find(x=>x.id===id); if(!p) return <div className="card p-6">Project not found.</div>; return (<div className="card p-6"><h2 className="text-xl font-semibold">{p.title} — {p.brand}</h2><div className="mt-2 text-base text-gray-600">Status: {p.status} • Due: {p.due} • Payout: ₹{p.payout.toLocaleString('en-IN')}</div><div className="mt-4"><h3 className="font-semibold">Progress</h3><p className="text-base">Submissions: {p.submissions?.length||0}</p></div></div>) }

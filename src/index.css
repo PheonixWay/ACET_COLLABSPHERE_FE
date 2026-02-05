@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --header-height: 72px; }
+html { scroll-behavior: smooth; }
+body { @apply text-base; }
+.container-px { @apply px-6 lg:px-10; }
+
+@layer components {
+  .card { @apply bg-white dark:bg-gray-800 rounded-2xl shadow-card border border-gray-100 dark:border-gray-700; }
+  .btn { @apply inline-flex items-center justify-center rounded-xl px-5 py-3 text-base font-semibold transition; }
+  .btn-primary { @apply btn bg-sky-600 text-white hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-400; }
+  .btn-ghost { @apply btn bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700; }
+  .input { @apply w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 py-3 outline-none focus:ring-2 focus:ring-sky-500; }
+  .select { @apply input; }
+  .label { @apply block text-base font-medium text-gray-700 dark:text-gray-300; }
+  .badge { @apply inline-flex items-center rounded-lg bg-sky-50 dark:bg-sky-900/40 px-3 py-1.5 text-sm font-medium text-sky-800 dark:text-sky-200; }
+  .sidebar-link-active { @apply bg-sky-100 text-sky-700 shadow-sm; }
+  .sidebar-link { @apply text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700; }
+  .sidebar-link-size { @apply rounded-2xl px-4 py-3 text-base; }
+
+  .hero {
+    @apply rounded-3xl p-12 bg-gradient-to-b from-sky-500 to-sky-300 text-white;
+  }
+
+  .hero h1 {
+  font-size: 2.25rem; /* same as text-4xl */
+  line-height: 2.5rem;
+  font-weight: 800;
+}
+
+
+  .hero p {
+    @apply text-lg mt-4;
+  }
+
+  .loading-gradient {
+    @apply bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500;
+  }
+
+  .logo-ring {
+    @apply w-28 h-28 rounded-full border-[8px] border-white/30 border-t-white;
+  }
+
+  .dots {
+    @apply flex gap-2 mt-6;
+  }
+
+  .dot {
+    @apply w-3 h-3 rounded-full bg-white/80;
+  }
+
+  /* Animated Loading Screen */
+  .loading-gradient { @apply bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500; }
+  .logo-ring { @apply w-28 h-28 rounded-full border-[8px] border-white/30 border-t-white; }
+  .dots { @apply flex gap-2 mt-6; }
+  .dot { @apply w-3 h-3 rounded-full bg-white/80; }
+}
+
+@keyframes pulseFade { 0%,100% { opacity: 0.35; transform: scale(0.98);} 50% { opacity: 1; transform: scale(1);} }
+.loading-splash { animation: pulseFade 1.5s ease-in-out infinite; }
