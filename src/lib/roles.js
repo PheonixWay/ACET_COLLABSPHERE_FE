@@ -1,1 +1,1 @@
-export const ROLES={ INFLUENCER:'influencer', BRAND:'brand' }
+export const ROLES={ INFLUENCER:'INFLUENCER', BRAND:'BRAND' }
