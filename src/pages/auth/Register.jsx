@@ -27,14 +27,9 @@ export default function Register() {
         role,
       })
       if (response.status === 201) {
-        login({
-          name: name || (role === ROLES.BRAND ? 'Brand User' : 'Influencer User'),
-          email: email || 'user@example.com',
-          role,
-          niche: role === ROLES.INFLUENCER ? niche : '',
-          company: role === ROLES.BRAND ? 'Your Brand' : '',
-        })
-        nav('/loading')
+        const { user } = response.data.data;
+        login(user);
+        nav('/loading');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred during registration.')

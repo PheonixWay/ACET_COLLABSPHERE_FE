@@ -1,1 +1,5 @@
-export const ROLES={ INFLUENCER:'INFLUENCER', BRAND:'BRAND' }
+export const ROLES = {
+  INFLUENCER: "INFLUENCER",
+  BRAND: "BRAND",
+};
+

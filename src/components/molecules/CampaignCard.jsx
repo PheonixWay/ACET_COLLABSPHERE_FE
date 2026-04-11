@@ -1,1 +1,37 @@
-export default function CampaignCard({ data, onApply }){ const amount=data.currency==='INR'?`₹${data.budget.toLocaleString('en-IN')}`:data.budget; return (<div className="card p-6 min-h-[220px]"><div className="flex items-start justify-between"><div><div className="text-base text-gray-500">{data.brand}</div><div className="mt-1 text-xl font-semibold">{data.title}</div></div><div className="text-base font-bold text-sky-700">{amount}</div></div><p className="mt-3 text-base text-gray-700 dark:text-gray-200">{data.description}</p><div className="mt-3 flex flex-wrap gap-2">{data.niche?.map(n=><span key={n} className="badge">{n}</span>)}</div><ul className="mt-3 list-disc pl-5 text-base text-gray-700 dark:text-gray-200">{data.requirements?.map((r,i)=><li key={i}>{r}</li>)}</ul><div className="mt-5 flex justify-end gap-3"><button className="btn btn-ghost" onClick={()=>alert('Viewing brief...')}>👀 View</button><button className="btn btn-primary" onClick={()=>onApply?.(data)}>✅ Apply</button></div></div>) }
+import { Link } from 'react-router-dom';
+
+export default function CampaignCard({ campaign }) {
+  const { _id, title, brand, budget, platforms, status } = campaign;
+  const brandName = brand?.brandProfile?.companyName || 'A Brand';
+
+  return (
+    <div className="card h-full flex flex-col justify-between animate-fadeIn p-5">
+      <div>
+        <div className="mb-2">
+          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+            status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{title}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+          By <span className="font-semibold">{brandName}</span>
+        </p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {Array.isArray(platforms) && platforms.map(p => (
+            <span key={p} className="badge badge-ghost">{p}</span>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
+        <p className="text-lg font-bold text-green-600 dark:text-green-400">
+          ₹{budget.toLocaleString('en-IN')}
+        </p>
+        <Link to={`/app/campaign/${_id}`} className="btn btn-primary btn-sm">
+          View Details
+        </Link>
+      </div>
+    </div>
+  );
+}

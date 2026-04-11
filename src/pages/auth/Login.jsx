@@ -7,7 +7,7 @@ import Footer from "../../components/organisms/Footer";
 import api from "../../services/api";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { loginWithCredentials, login } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,16 +18,8 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     try {
-      const response = await api.post("/auth/login", { email, password });
-      if (response.status === 200 && response.data.success) {
-        const user = response.data.data;
-        // The role from the form is used here, but the backend should be the source of truth.
-        // Assuming the login context needs the role to be set.
-        login({ ...user, role });
-        nav("/loading");
-      } else {
-        setError(response.data.message || "Login failed. Please try again.");
-      }
+      await loginWithCredentials({ email, password });
+      nav("/loading");
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred during login.");
     }

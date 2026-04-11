@@ -1,2 +1,80 @@
-import { useState } from 'react'
-export default function CreateCampaign(){ const [title,setTitle]=useState(''); const [budget,setBudget]=useState(''); const [niche,setNiche]=useState(''); const [desc,setDesc]=useState(''); const [deliverables,setDeliverables]=useState(''); const [start,setStart]=useState(''); const [end,setEnd]=useState(''); const [platform,setPlatform]=useState('Instagram'); const onCreate=(e)=>{ e.preventDefault(); alert('Campaign created (mock)') }; return (<div className="card p-6"><h2 className="text-xl font-semibold">🆕 Create Campaign</h2><form className="mt-6 grid gap-5 md:grid-cols-2" onSubmit={onCreate}><div className="md:col-span-2"><label className="label">Title</label><input className="input" value={title} onChange={e=>setTitle(e.target.value)} /></div><div><label className="label">Budget (₹ INR)</label><input type="number" className="input" value={budget} onChange={e=>setBudget(e.target.value)} /></div><div><label className="label">Niche (comma separated)</label><input className="input" value={niche} onChange={e=>setNiche(e.target.value)} /></div><div className="md:col-span-2"><label className="label">Description</label><textarea className="input min-h-32" value={desc} onChange={e=>setDesc(e.target.value)} /></div><div className="md:col-span-2"><label className="label">Deliverables (one per line)</label><textarea className="input min-h-28" value={deliverables} onChange={e=>setDeliverables(e.target.value)} /></div><div><label className="label">Start Date</label><input type="date" className="input" value={start} onChange={e=>setStart(e.target.value)} /></div><div><label className="label">End Date</label><input type="date" className="input" value={end} onChange={e=>setEnd(e.target.value)} /></div><div className="md:col-span-2"><label className="label">Primary Platform</label><select className="select" value={platform} onChange={e=>setPlatform(e.target.value)}><option>Instagram</option><option>YouTube</option><option>Twitter/X</option><option>Facebook</option></select></div><div className="md:col-span-2 flex justify-end"><button className="btn btn-primary">Create</button></div></form></div>) }
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
+
+export default function CreateCampaign() {
+  const { user } = useAuth();
+  const nav = useNavigate();
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    budget: "",
+  });
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    if (!user?._id) {
+      setError("You must be logged in to create a campaign.");
+      return;
+    }
+    try {
+      const { data } = await api.post(`/campaigns/${user._id}`, form);
+      if (data.success) {
+        nav("/app/my-campaigns");
+      }
+    } catch (err) {
+      setError("Failed to create campaign.");
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto my-10 p-8 bg-white rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold mb-6">Create a New Campaign</h1>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="label">Campaign Title</label>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            className="input"
+            placeholder="e.g., Summer Fashion Launch"
+          />
+        </div>
+        <div>
+          <label className="label">Budget (in INR)</label>
+          <input
+            type="number"
+            name="budget"
+            value={form.budget}
+            onChange={handleChange}
+            className="input"
+            placeholder="e.g., 500"
+          />
+        </div>
+        <div>
+          <label className="label">Description</label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            className="input h-32"
+            placeholder="Describe the campaign goals, deliverables, and requirements for influencers."
+          ></textarea>
+        </div>
+        <button type="submit" className="btn btn-primary w-full">
+          🚀 Launch Campaign
+        </button>
+      </form>
+    </div>
+  );
+}

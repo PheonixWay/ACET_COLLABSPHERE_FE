@@ -1,3 +1,104 @@
-import { useParams } from 'react-router-dom'
-import { CAMPAIGNS } from '../../data/mockCampaigns'
-export default function CampaignDetail(){ const { id }=useParams(); const c=CAMPAIGNS.find(x=>x.id===id); if(!c) return <div className="card p-6">Campaign not found.</div>; return (<div className="card p-6"><h2 className="text-xl font-semibold">{c.title}</h2><div className="mt-2 text-base text-gray-600 dark:text-gray-300">Brand: {c.brand} • Budget: ₹{c.budget.toLocaleString('en-IN')}</div><p className="mt-4 text-base">{c.description}</p><div className="mt-4"><h3 className="font-semibold">Requirements</h3><ul className="list-disc pl-5">{c.requirements.map((r,i)=><li key={i} className="text-base">{r}</li>)}</ul></div><div className="mt-4"><h3 className="font-semibold">Niche</h3><div className="flex flex-wrap gap-2">{c.niche.map(n=><span key={n} className="badge">{n}</span>)}</div></div></div>) }
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
+
+export default function CampaignDetail() {
+  const { id } = useParams();
+  const { user } = useAuth();
+  const nav = useNavigate();
+  const [campaign, setCampaign] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isApplying, setIsApplying] = useState(false);
+
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      try {
+        const token = localStorage.getItem("collabsphere_token");
+        const { data } = await api.get(`/campaigns/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (data.success) {
+          setCampaign(data.data);
+        }
+      } catch (err) {
+        setError("Failed to fetch campaign details.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCampaign();
+  }, [id]);
+
+  const handleApply = async () => {
+    setIsApplying(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("collabsphere_token");
+      await api.post(`/campaigns/${id}/apply`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Successfully applied for the campaign!");
+      nav("/app/influencer/applications");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to apply.");
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error && !campaign) return <div className="text-red-500">{error}</div>;
+  if (!campaign) return <div>Campaign not found.</div>;
+
+  const isInfluencer = user.role === "INFLUENCER";
+  const hasApplied = campaign.applicants.includes(user._id);
+
+  return (
+    <div className="max-w-4xl mx-auto my-10 p-8 bg-white rounded-lg shadow-md">
+      <h1 className="text-3xl font-bold mb-2">{campaign.title}</h1>
+      <p className="text-md text-gray-600 mb-6">
+        by {campaign.brand?.brandProfile?.companyName || "A Brand"}
+      </p>
+
+      <div className="mb-6">
+        <span className="font-bold text-2xl text-green-600">${campaign.budget}</span>
+        <span className="text-gray-500"> Budget</span>
+      </div>
+
+      <div className="prose max-w-none mb-8">
+        <p>{campaign.description}</p>
+      </div>
+
+      {isInfluencer && (
+        <div className="text-center">
+          {hasApplied ? (
+            <p className="font-semibold text-green-600">You have already applied to this campaign.</p>
+          ) : (
+            <button onClick={handleApply} disabled={isApplying} className="btn btn-primary btn-lg">
+              {isApplying ? "Applying..." : "Apply Now"}
+            </button>
+          )}
+          {error && <p className="text-red-500 mt-2">{error}</p>}
+        </div>
+      )}
+
+      {!isInfluencer && (
+         <div className="mt-8">
+         <h2 className="text-xl font-bold mb-4">
+           Applicants ({campaign.applicants.length})
+         </h2>
+         {campaign.applicants.length > 0 ? (
+           <p>
+             {campaign.applicants.length} influencer(s) have applied. Viewing applicants will be available soon.
+           </p>
+         ) : (
+           <p>No applicants yet.</p>
+         )}
+       </div>
+      )}
+    </div>
+  );
+}
