@@ -1,7 +1,87 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
-import { ROLES } from '../../lib/roles'
-import TextLogo from '../../components/atoms/TextLogo'
-import Footer from '../../components/organisms/Footer'
-export default function Login(){ const { login }=useAuth(); const nav=useNavigate(); const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [role,setRole]=useState(ROLES.INFLUENCER); const onSubmit=(e)=>{ e.preventDefault(); login({ name: role===ROLES.BRAND?'Brand User':'Influencer User', email: email||'user@example.com', role, niche: role===ROLES.INFLUENCER?'Lifestyle':'', company: role===ROLES.BRAND?'Acme India':'', password }); nav('/loading') }; return (<div className="min-h-dvh flex flex-col bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-950"><header className="h-[var(--header-height)] border-b border-sky-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur"><div className="container-px h-full flex items-center"><TextLogo /></div></header><div className="flex-1 grid place-items-center"><div className="card w-full max-w-lg p-8"><h1 className="text-2xl font-bold">Welcome back 👋</h1><form className="mt-6 space-y-5" onSubmit={onSubmit}><div><label className="label">Email</label><input className="input" type="email" placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} /></div><div><label className="label">Password</label><input className="input" type="password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)} /></div><div><label className="label">Role</label><select className="select" value={role} onChange={e=>setRole(e.target.value)}><option value={ROLES.INFLUENCER}>Influencer</option><option value={ROLES.BRAND}>Brand</option></select></div><button className="btn btn-primary w-full">➡️ Login</button></form><div className="mt-5 text-base text-gray-600 dark:text-gray-300">New here? <Link className="text-sky-700 dark:text-sky-300 underline" to="/register">Create an account</Link></div></div></div><Footer /></div>) }
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { ROLES } from "../../lib/roles";
+import TextLogo from "../../components/atoms/TextLogo";
+import Footer from "../../components/organisms/Footer";
+import api from "../../services/api";
+
+export default function Login() {
+  const { loginWithCredentials, login } = useAuth();
+  const nav = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState(ROLES.INFLUENCER);
+  const [error, setError] = useState(null);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      await loginWithCredentials({ email, password });
+      nav("/loading");
+    } catch (err) {
+      setError(err.response?.data?.message || "An error occurred during login.");
+    }
+  };
+
+  return (
+    <div className="min-h-dvh flex flex-col bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <header className="h-[var(--header-height)] border-b border-sky-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
+        <div className="container-px h-full flex items-center">
+          <TextLogo />
+        </div>
+      </header>
+      <div className="flex-1 grid place-items-center">
+        <div className="card w-full max-w-lg p-8">
+          <h1 className="text-2xl font-bold">Welcome back 👋</h1>
+          {error && <div className="mt-4 text-red-500">{error}</div>}
+          <form className="mt-6 space-y-5" onSubmit={onSubmit}>
+            <div>
+              <label className="label">Email</label>
+              <input
+                className="input"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label">Password</label>
+              <input
+                className="input"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label">Role</label>
+              <select
+                className="select"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option value={ROLES.INFLUENCER}>Influencer</option>
+                <option value={ROLES.BRAND}>Brand</option>
+              </select>
+            </div>
+            <button className="btn btn-primary w-full">➡️ Login</button>
+          </form>
+          <div className="mt-5 text-base text-gray-600 dark:text-gray-300">
+            New here?{" "}
+            <Link
+              className="text-sky-700 dark:text-sky-300 underline"
+              to="/register"
+            >
+              Create an account
+            </Link>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+}
