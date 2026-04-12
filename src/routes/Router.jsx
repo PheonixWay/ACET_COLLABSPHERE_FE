@@ -25,6 +25,8 @@ import BrowseInfluencers from '../pages/brand/BrowseInfluencers';
 import BrandProjectDetail from '../pages/brand/BrandProjectDetail';
 import EditCampaign from '../pages/brand/EditCampaign';
 import { ROLES } from '../lib/roles';
+import InfluencerCampaignDetail from '../pages/influencer/CampaignDetail';
+import ProjectSubmission from '../pages/influencer/ProjectSubmission';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -62,8 +64,10 @@ export function AppRouter() {
           <>
             <Route path="profile" element={<InfluencerProfile />} />
             <Route path="browse-campaigns" element={<BrowseCampaigns />} />
+            <Route path="campaign/:campaignId" element={<InfluencerCampaignDetail />} />
             <Route path="my-applications" element={<MyApplications />} />
             <Route path="active-projects" element={<ActiveProjects />} />
+            <Route path="project/:id/submit" element={<ProjectSubmission />} />
             <Route path="earnings" element={<Earnings />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="messages" element={<Messages />} />
