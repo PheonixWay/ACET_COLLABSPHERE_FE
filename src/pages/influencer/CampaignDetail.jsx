@@ -3,6 +3,29 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
 
+const FormattedDescription = ({ description }) => {
+  if (!description) return null;
+
+  // Split by newline and process each line
+  const lines = description.split('\n').map((line, index) => {
+    const trimmedLine = line.trim();
+    if (trimmedLine === '') {
+      return <br key={index} />;
+    }
+    // Bold headings like "A. Campaign Overview"
+    if (trimmedLine.match(/^[A-E]\./)) {
+      return <p key={index} className="font-bold mt-4">{trimmedLine}</p>;
+    }
+    // Bold headings like "[Brand Name] Campaign Brief"
+    if (trimmedLine.match(/^\[.*\]/)) {
+        return <p key={index} className="font-bold text-xl mb-4">{trimmedLine}</p>;
+    }
+    return <p key={index}>{trimmedLine}</p>;
+  });
+
+  return <div>{lines}</div>;
+};
+
 export default function CampaignDetail() {
   const { campaignId } = useParams();
   const { user } = useAuth();
@@ -124,7 +147,9 @@ export default function CampaignDetail() {
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <div>
             <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">About the Campaign</h2>
-            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{description}</p>
+            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+              <FormattedDescription description={description} />
+            </p>
           </div>
           <div>
             <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">Key Information</h2>
@@ -147,15 +172,6 @@ export default function CampaignDetail() {
           </div>
         </div>
 
-        {/* Deliverables */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">📝 Deliverables</h2>
-          <ul className="space-y-3 list-disc list-inside text-gray-700 dark:text-gray-300">
-            {deliverables?.map((item, index) => (
-              <li key={index}>{item}</li>
-            ))}
-          </ul>
-        </div>
       </div>
     </div>
   );

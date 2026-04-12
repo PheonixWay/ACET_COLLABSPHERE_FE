@@ -123,9 +123,11 @@ const DashboardSkeleton = () => (
 function BrandDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState({
-    totalCampaigns: 0,
-    openCampaigns: 0,
-    totalApplicants: 0,
+    totalAmountPaid: 0,
+    activeProjects: 0,
+    submittedProjects: 0,
+    completedProjects: 0,
+    totalApplications: 0,
   });
   const [recentCampaigns, setRecentCampaigns] = useState([]);
   const [recentApplicants, setRecentApplicants] = useState([]);
@@ -137,6 +139,7 @@ function BrandDashboard() {
       try {
         setLoading(true);
         const { data } = await api.get(`/profile/brand/dashboard-stats/${user._id}`);
+        consol.log("Brand dashboard stats response:", data);
         if (data.success) {
           setStats(data.data.stats);
           setRecentCampaigns(data.data.recentCampaigns);
@@ -153,17 +156,19 @@ function BrandDashboard() {
   }, [user]);
 
   if (loading) {
-    return <div>Loading brand dashboard...</div>;
+    return <DashboardSkeleton />;
   }
 
 
   return (
     <div className="space-y-6">
       {/* 1. Key Brand Metrics */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Total Campaigns" value={stats.totalCampaigns} hint="All time" icon="📢" />
-        <StatCard title="Open for Apps" value={stats.openCampaigns} hint="Actively recruiting" icon="✅" />
-        <StatCard title="Total Applicants" value={stats.totalApplicants} hint="Across all campaigns" icon="👥" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <StatCard title="Total Payout" value={`₹${stats.totalAmountPaid.toLocaleString('en-IN')}`} hint="Completed Projects" icon="💰" />
+        <StatCard title="Active Projects" value={stats.activeProjects} hint="Accepted by Influencers" icon="🚀" />
+        <StatCard title="Submitted Projects" value={stats.submittedProjects} hint="Awaiting Review" icon="✅" />
+        <StatCard title="Completed Projects" value={stats.completedProjects} hint="Finished & Paid" icon="🏆" />
+        <StatCard title="Total Applications" value={stats.totalApplications} hint="Across all campaigns" icon="👥" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -172,7 +177,7 @@ function BrandDashboard() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Recent Campaigns Table */}
-          <div className="card p-6">
+          <div className="card p-6 bg-base-100 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">📢 Recent Campaigns</h2>
               <Link to="/app/my-campaigns" className="text-sm text-sky-600 hover:underline">Manage All</Link>

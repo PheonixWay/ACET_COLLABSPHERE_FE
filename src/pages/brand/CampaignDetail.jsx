@@ -3,6 +3,29 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 
+const FormattedDescription = ({ description }) => {
+  if (!description) return null;
+
+  // Split by newline and process each line
+  const lines = description.split('\n').map((line, index) => {
+    const trimmedLine = line.trim();
+    if (trimmedLine === '') {
+      return <br key={index} />;
+    }
+    // Bold headings like "A. Campaign Overview"
+    if (trimmedLine.match(/^[A-E]\./)) {
+      return <p key={index} className="font-bold mt-4">{trimmedLine}</p>;
+    }
+    // Bold headings like "[Brand Name] Campaign Brief"
+    if (trimmedLine.match(/^\[.*\]/)) {
+        return <p key={index} className="font-bold text-xl mb-4">{trimmedLine}</p>;
+    }
+    return <p key={index}>{trimmedLine}</p>;
+  });
+
+  return <div>{lines}</div>;
+};
+
 export default function CampaignDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -69,7 +92,7 @@ export default function CampaignDetail() {
       </div>
 
       <div className="prose max-w-none mb-8">
-        <p>{campaign.description}</p>
+        <FormattedDescription description={campaign.description} />
       </div>
 
       {isInfluencer && (
