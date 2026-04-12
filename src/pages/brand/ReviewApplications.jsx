@@ -30,8 +30,8 @@ export default function ReviewApplications() {
     return applicants.data.filter(
       (a) =>
         a.influencer.name.toLowerCase().includes(s) ||
-        a.influencer.niche.join(" ").toLowerCase().includes(s) ||
-        String(a.influencer.followers).includes(s)
+        a.influencer.influencerProfile?.niche?.join(" ").toLowerCase().includes(s) ||
+        String(a.influencer.influencerProfile?.followers).includes(s)
     );
   }, [q, applicants]);
 
@@ -70,21 +70,23 @@ export default function ReviewApplications() {
               {filtered.map((a) => (
                 <tr key={a._id} className="border-t border-gray-100 dark:border-gray-700">
                   <td className="px-3 py-2">{a.influencer.name}</td>
-                  <td className="px-3 py-2">{a.influencer.niche.join(", ")}</td>
+                  <td className="px-3 py-2">{a.influencer.influencerProfile?.niche?.join(", ") || 'N/A'}</td>
                   <td className="px-3 py-2">
-                    {a.influencer.followers.toLocaleString("en-IN")}
+                    {a.influencer.influencerProfile?.followers?.toLocaleString("en-IN") || 'N/A'}
                   </td>
                   <td className="px-3 py-2 capitalize">{a.status}</td>
                   <td className="px-3 py-2 flex gap-2">
                     <button
                       className="btn btn-primary"
                       onClick={() => handleUpdateStatus(a._id, "accepted")}
+                      disabled={a.status === 'accepted'}
                     >
                       ✅ Accept
                     </button>
                     <button
                       className="btn btn-ghost"
                       onClick={() => handleUpdateStatus(a._id, "rejected")}
+                      disabled={a.status === 'rejected'}
                     >
                       ❌ Reject
                     </button>

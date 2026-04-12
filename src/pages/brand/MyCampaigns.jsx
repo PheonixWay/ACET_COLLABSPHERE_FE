@@ -79,7 +79,7 @@ export default function MyCampaigns() {
             <div key={c._id} className="card p-6 min-h-[220px]">
               <div className="text-xl font-semibold">{c.title}</div>
               <div className="text-base text-gray-600 dark:text-gray-300">
-                Budget: ₹{c.budget.toLocaleString("en-IN")}
+                Budget: ₹{c.budget?.amount?.toLocaleString("en-IN") || 'N/A'}
               </div>
               <div className="mt-2 text-base">
                 Status: <span className={`font-semibold ${c.status === 'OPEN' ? 'text-green-500' : 'text-red-500'}`}>{c.status}</span>
