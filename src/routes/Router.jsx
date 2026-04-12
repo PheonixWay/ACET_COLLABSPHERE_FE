@@ -27,6 +27,7 @@ import EditCampaign from '../pages/brand/EditCampaign';
 import { ROLES } from '../lib/roles';
 import InfluencerCampaignDetail from '../pages/influencer/CampaignDetail';
 import ProjectSubmission from '../pages/influencer/ProjectSubmission';
+import BrandActiveProjects from '../pages/brand/ActiveProjects';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -53,6 +54,7 @@ export function AppRouter() {
             <Route path="profile" element={<BrandProfile />} />
             <Route path="create-campaign" element={<CreateCampaign />} />
             <Route path="my-campaigns" element={<MyCampaigns />} />
+            <Route path="active-projects" element={<BrandActiveProjects />} />
             <Route path="campaign/:campaignId/edit" element={<EditCampaign />} />
             <Route path="campaign/:id" element={<CampaignDetail />} />
             <Route path="campaign/:id/review" element={<ReviewApplications />} />
