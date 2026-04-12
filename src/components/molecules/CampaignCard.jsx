@@ -44,7 +44,7 @@ export default function CampaignCard({ campaign, applicationStatus }) {
       </div>
       <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
         <p className="text-lg font-bold text-green-600 dark:text-green-400">
-          ₹{budget?.amount?.toLocaleString('en-IN') || 'N/A'}
+          ₹{budget?.toLocaleString('en-IN') || 'N/A'}
         </p>
         <Link to={`/app/campaign/${_id}`} className="btn btn-primary btn-sm">
           View Details

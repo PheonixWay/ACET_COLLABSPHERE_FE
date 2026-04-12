@@ -26,7 +26,7 @@ import BrandProjectDetail from '../pages/brand/BrandProjectDetail';
 import EditCampaign from '../pages/brand/EditCampaign';
 import { ROLES } from '../lib/roles';
 import InfluencerCampaignDetail from '../pages/influencer/CampaignDetail';
-import ProjectSubmission from '../pages/influencer/ProjectSubmission';
+import SubmitWork from '../pages/influencer/SubmitWork';
 import BrandActiveProjects from '../pages/brand/ActiveProjects';
 
 function PrivateRoute({ children }) {
@@ -69,7 +69,7 @@ export function AppRouter() {
             <Route path="campaign/:campaignId" element={<InfluencerCampaignDetail />} />
             <Route path="my-applications" element={<MyApplications />} />
             <Route path="active-projects" element={<ActiveProjects />} />
-            <Route path="project/:id/submit" element={<ProjectSubmission />} />
+            <Route path="project/:projectId/submit" element={<SubmitWork />} />
             <Route path="earnings" element={<Earnings />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="messages" element={<Messages />} />

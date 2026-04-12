@@ -7,26 +7,28 @@ export default function CampaignDetail() {
   const { campaignId } = useParams();
   const { user } = useAuth();
   const [campaign, setCampaign] = useState(null);
+  const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isApplied, setIsApplied] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
 
   useEffect(() => {
-    const fetchCampaign = async () => {
-      if (!user?._id) {
-        // Don't fetch if user is not loaded yet
+    const fetchCampaignAndApplication = async () => {
+      if (!user?._id || !campaignId) {
+        setLoading(false);
         return;
       }
       try {
         setLoading(true);
-        const response = await api.get(`/campaigns/${campaignId}`);
-        setCampaign(response.data.data);
+        // Fetch campaign details
+        const campaignResponse = await api.get(`/campaigns/${campaignId}`);
+        setCampaign(campaignResponse.data.data);
         
-        // Check if the user has applied by checking campaign applications
+        // Check if an application exists for this campaign and user
         const applicationsResponse = await api.get(`/campaign-applications/my-applications/${user._id}`);
-        if (applicationsResponse.data.data.some(app => app.campaign._id === campaignId)) {
-          setIsApplied(true);
+        const existingApplication = applicationsResponse.data.data.find(app => app.campaign._id === campaignId);
+        if (existingApplication) {
+          setApplication(existingApplication);
         }
 
       } catch (err) {
@@ -37,18 +39,16 @@ export default function CampaignDetail() {
       }
     };
 
-    if (campaignId) {
-      fetchCampaign();
-    }
+    fetchCampaignAndApplication();
   }, [campaignId, user?._id]);
 
   const handleApply = async () => {
     setIsApplying(true);
     try {
-      await api.post(`/campaign-applications/${campaignId}/apply`, {
+      const response = await api.post(`/campaign-applications/${campaignId}/apply`, {
         influencerId: user._id,
       });
-      setIsApplied(true);
+      setApplication(response.data.data); // Set the new application
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while applying.");
@@ -93,16 +93,32 @@ export default function CampaignDetail() {
 
         {/* Apply Button & Status */}
         <div className="mb-8 text-center">
-          <button 
-            onClick={handleApply} 
-            disabled={isApplied || isApplying || status !== 'OPEN'}
+          <button
+            onClick={handleApply}
+            disabled={!!application || isApplying || status !== 'OPEN'}
             className="btn btn-primary btn-lg w-full md:w-auto px-12 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isApplying ? 'Submitting...' : isApplied ? '✓ Applied' : 'Apply Now'}
+            {isApplying ? 'Submitting...' : (!!application ? `Applied (${application.status})` : 'Apply Now')}
           </button>
-          {status !== 'OPEN' && !isApplied && <p className="text-sm text-yellow-600 mt-2">This campaign is not currently accepting applications.</p>}
-          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+          {error && <p className="text-red-500 mt-4">{error}</p>}
         </div>
+
+        {/* Submission Details */}
+        {application && application.submission && (
+          <div className="mb-8 p-6 bg-blue-50 dark:bg-gray-700 rounded-lg">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Your Submission</h2>
+            <div className="space-y-2">
+              {JSON.parse(application.submission).map((link, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <span className="font-semibold capitalize">{link.type}:</span>
+                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline truncate">
+                    {link.url}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Core Details */}
         <div className="grid md:grid-cols-2 gap-8 mb-8">
