@@ -35,31 +35,25 @@ export default function Dashboard() {
 /* -------------------------------------------------------------------------- */
 function InfluencerDashboard({ user }) {
   const [stats, setStats] = useState({
-    earnings: 0,
-    pending: 0,
-    active: 0,
+    totalEarnings: 0,
+    submittedProjects: 0,
+    activeProjects: 0,
     applications: 0,
+    rejected: 0,
   });
-  const [campaigns, setCampaigns] = useState([]);
+  const [recentApplications, setRecentApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // In a real app, you'd fetch this data from dedicated endpoints
-        // For now, we'll fetch all campaigns and derive stats
-        const response = await api.get('/campaigns');
-        const allCampaigns = response.data.data;
-        
-        // Mocking stats for now as endpoints don't exist
-        setStats({
-          earnings: 52500, // Mock
-          pending: 12000, // Mock
-          active: 2, // Mock
-          applications: 5, // Mock
-        });
-        setCampaigns(allCampaigns.slice(0, 3)); // show 3 latest campaigns
+        const { data } = await api.get(`/influencer/dashboard-stats/${user._id}`);
+      console.log("Dashboard stats response:", data);
+        if (data.success) {
+          setStats(data.data.stats);
+          setRecentApplications(data.data.recentApplications);
+        }
       } catch (error) {
         console.error("Failed to fetch influencer dashboard data:", error);
       } finally {
@@ -67,92 +61,62 @@ function InfluencerDashboard({ user }) {
       }
     };
 
-    fetchDashboardData();
-  }, [user]);
-
-
-  // Mock Profile Completeness Calculation
-  const profileScore = useMemo(() => {
-    let score = 40; // Base score
-    if (user?.niche) score += 20;
-    if (user?.bio) score += 20;
-    if (user?.instagram) score += 10;
-    if (user?.youtube) score += 10;
-    return Math.min(score, 100);
+    if (user?._id) {
+      fetchDashboardData();
+    }
   }, [user]);
 
   if (loading) {
-    return <div>Loading dashboard...</div>;
+    return <DashboardSkeleton />;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* 1. Stats Row */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Earnings" value={`₹${stats.earnings.toLocaleString('en-IN')}`} />
-        <StatCard title="Pending Payouts" value={`₹${stats.pending.toLocaleString('en-IN')}`} />
-        <StatCard title="Active Projects" value={stats.active} />
-        <StatCard title="Applications" value={stats.applications} />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Earnings" value={`₹${stats.totalEarnings.toLocaleString('en-IN')}`} icon="💰" />
+        <StatCard title="Submitted Projects" value={stats.submittedProjects} icon="✅" />
+        <StatCard title="Active Projects" value={stats.activeProjects} icon="🚀" />
+        <StatCard title="Total Applications" value={stats.applications} icon="📄" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-8 lg:grid-cols-3">
         {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Recommendations */}
-          <div className="card p-6 border-l-4 border-l-sky-400">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2">✨ Recommended For You</h2>
-              <Link to="/app/browse-campaigns" className="text-sm text-sky-600 hover:underline">View all</Link>
-            </div>
-            {campaigns.length > 0 ? (
-              <div className="space-y-3">
-                {campaigns.map(c => (
-                  <div key={c._id} className="flex items-center justify-between rounded-xl bg-sky-50 dark:bg-sky-900/20 p-4 border border-sky-100 dark:border-sky-900/30">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">{c.title}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{c.brand.name} • <span className="font-semibold text-green-700 dark:text-green-400">Budget: ₹{c.budget.toLocaleString()}</span></div>
-                    </div>
-                    <Link to={`/app/campaign/${c._id}`} className="btn bg-white dark:bg-gray-800 text-sm shadow-sm border">View</Link>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-gray-500">👍 No new recommendations right now.</div>
-            )}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Recent Applications */}
+          <div className="card bg-base-100 shadow-lg">
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Profile Strength Widget */}
-          <div className="card p-6 bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="font-semibold">🚀 Profile Strength</h2>
-              <span className="font-bold">{profileScore}%</span>
-            </div>
-            <div className="w-full bg-white/30 rounded-full h-2.5 mb-4">
-              <div className="bg-white h-2.5 rounded-full transition-all duration-1000" style={{ width: `${profileScore}%` }}></div>
-            </div>
-            <p className="text-sm text-white/90 mb-3">Complete your bio and link socials to boost visibility by 3x.</p>
-            <Link to="/app/profile" className="block text-center bg-white/20 hover:bg-white/30 py-2 rounded-lg text-sm font-medium transition">Edit Profile</Link>
-          </div>
-
-          {/* Niche Trends Widget */}
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold mb-3">🔥 Trending in {user?.niche || 'Lifestyle'}</h2>
-            <ul className="space-y-3">
-              <li className="text-sm flex items-center gap-2"><span className="text-lg">🎵</span> <span>Reels with "As It Was" audio</span></li>
-              <li className="text-sm flex items-center gap-2"><span className="text-lg">☀️</span> <span>Summer Skincare routines</span></li>
-              <li className="text-sm flex items-center gap-2"><span className="text-lg">🎒</span> <span>"What's in my bag" 2025</span></li>
-            </ul>
-          </div>
-        </div>
       </div>
     </div>
-  )
+  );
 }
 
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'accepted': return 'info';
+    case 'submitted': return 'success';
+    case 'rejected': return 'error';
+    default: return 'ghost';
+  }
+}
+
+const DashboardSkeleton = () => (
+  <div className="space-y-8 animate-pulse">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="h-24 bg-base-300 rounded-lg"></div>
+      <div className="h-24 bg-base-300 rounded-lg"></div>
+      <div className="h-24 bg-base-300 rounded-lg"></div>
+      <div className="h-24 bg-base-300 rounded-lg"></div>
+    </div>
+    <div className="grid gap-8 lg:grid-cols-3">
+      <div className="lg:col-span-2 h-64 bg-base-300 rounded-lg"></div>
+      <div className="lg:col-span-1 h-64 bg-base-300 rounded-lg"></div>
+    </div>
+  </div>
+);
+        
 /* -------------------------------------------------------------------------- */
 /* BRAND DASHBOARD                                */
 /* -------------------------------------------------------------------------- */
@@ -164,6 +128,7 @@ function BrandDashboard() {
     totalApplicants: 0,
   });
   const [recentCampaigns, setRecentCampaigns] = useState([]);
+  const [recentApplicants, setRecentApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -171,19 +136,12 @@ function BrandDashboard() {
       if (!user?._id) return;
       try {
         setLoading(true);
-        const response = await api.get(`/campaigns/by-brand/${user._id}`);
-        const campaigns = response.data.data;
-        
-        const openCampaigns = campaigns.filter(c => c.status === 'open').length;
-        const totalApplicants = campaigns.reduce((sum, c) => sum + (c.applicants?.length || 0), 0);
-
-        setStats({
-          totalCampaigns: campaigns.length,
-          openCampaigns,
-          totalApplicants,
-        });
-        setRecentCampaigns(campaigns.slice(0, 3));
-
+        const { data } = await api.get(`/profile/brand/dashboard-stats/${user._id}`);
+        if (data.success) {
+          setStats(data.data.stats);
+          setRecentCampaigns(data.data.recentCampaigns);
+          setRecentApplicants(data.data.recentApplicants);
+        }
       } catch (error) {
         console.error("Failed to fetch brand dashboard data:", error);
       } finally {
@@ -202,11 +160,10 @@ function BrandDashboard() {
   return (
     <div className="space-y-6">
       {/* 1. Key Brand Metrics */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Campaigns" value={stats.totalCampaigns} hint="All time" />
-        <StatCard title="Open for Apps" value={stats.openCampaigns} hint="Actively recruiting" />
-        <StatCard title="Total Applicants" value={stats.totalApplicants} hint="Across all campaigns" />
-        <StatCard title="Unread Messages" value="2" hint="Influencer queries" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard title="Total Campaigns" value={stats.totalCampaigns} hint="All time" icon="📢" />
+        <StatCard title="Open for Apps" value={stats.openCampaigns} hint="Actively recruiting" icon="✅" />
+        <StatCard title="Total Applicants" value={stats.totalApplicants} hint="Across all campaigns" icon="👥" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -234,7 +191,7 @@ function BrandDashboard() {
                   {recentCampaigns.map(c => (
                     <tr key={c._id}>
                       <td className="py-3 font-medium text-gray-900 dark:text-white">{c.title}</td>
-                      <td className="py-3">{c.platforms.join(', ')}</td>
+                      <td className="py-3">{c.platforms?.join(', ') || 'N/A'}</td>
                       <td className="py-3">₹{c.budget.toLocaleString()}</td>
                       <td className="py-3 text-center font-medium">{c.applicants?.length || 0}</td>
                     </tr>
@@ -267,27 +224,25 @@ function BrandDashboard() {
           <div className="card p-6">
             <h2 className="text-lg font-semibold mb-4">👋 New Applicants</h2>
             <div className="space-y-3">
-              {/* This would be dynamic in a real app */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">👤</div>
-                  <div>
-                    <div className="font-medium">Riya Sharma</div>
-                    <div className="text-xs text-gray-500">Applied to "Summer Glow"</div>
+              {recentApplicants.map(applicant => (
+                <div key={applicant._id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <img src={applicant.influencer.profileImage || 'https://via.placeholder.com/40'} alt={applicant.influencer.name} className="rounded-full" />
+                    </div>
+                    <div>
+                      <div className="font-medium">{applicant.influencer.name}</div>
+                      <div className="text-xs text-gray-500">Applied to "{applicant.campaign.title}"</div>
+                    </div>
                   </div>
+                  <Link to={`/app/applicants/${applicant._id}`} className="text-xs text-blue-600 hover:underline">View</Link>
                 </div>
-                <Link to="/app/applicants" className="text-xs text-blue-600 hover:underline">View</Link>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">👤</div>
-                  <div>
-                    <div className="font-medium">Karan Singh</div>
-                    <div className="text-xs text-gray-500">Applied to "Gamer's Delight"</div>
-                  </div>
+              ))}
+              {recentApplicants.length === 0 && !loading && (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No new applicants yet.</p>
                 </div>
-                <Link to="/app/applicants" className="text-xs text-blue-600 hover:underline">View</Link>
-              </div>
+              )}
             </div>
           </div>
         </div>
